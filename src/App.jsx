@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import Header from "./Header.jsx";
 import "./App.css";
 import FilteredCountries from "./FilteredCountries.jsx";
-import darkModeMagnifying from "./assets/design/search.jpg";
+import darkModeMagnifying from "./assets/design/search.png";
 import magnifyingGlass from "./assets/design/magnifying-glass.png";
 import { useCountry } from "./CartContext.jsx";
 
