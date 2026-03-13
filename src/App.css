@@ -16,6 +16,15 @@ body {
   font-optical-sizing: auto;
 }
 
+select {
+  appearance: none;
+  -webkit-appearance: menulist; /* Chrome/Safari */
+  -moz-appearance: menulist; /* Firefox */
+  appearance: menulist; /* standard */
+  background: white;
+  outline: none;
+}
+
 .header-container {
   display: flex;
   padding: 2rem;
@@ -170,7 +179,7 @@ body {
 .back-button:active,
 .back-button:focus {
   text-decoration: none;
-  color: inherit;
+  color: black;
 }
 
 .country-info-container {
@@ -319,7 +328,7 @@ body {
 
 @media (max-width: 530px) {
   .header-container h1 {
-    font-size: 22px;
+    font-size: 18px;
   }
   .search-container {
     flex-direction: column;
