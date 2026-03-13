@@ -1,8 +1,6 @@
 import { useCountry } from "./CartContext";
-import moonIcon from "../../frontend/src/assets/design/moon.png";
-import crescentMoon from "../../frontend/src/assets/design/crescent-moon.png";
-import smallMoon from "../../frontend/src/assets/design/moon-small.png";
-import yellowSunIcon from "../../frontend/src/assets/design/sun-yellow.png";
+import crescentMoon from "./assets/design/crescent-moon.png";
+import yellowSunIcon from "./assets/design/sun-yellow.png";
 
 export default function Header({}) {
   const { darkMode, setDarkMode } = useCountry();
