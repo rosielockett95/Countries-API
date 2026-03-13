@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useCountry } from "./CartContext.jsx";
 
 export default function FilteredCountries({
   countries,
@@ -6,14 +8,31 @@ export default function FilteredCountries({
   extractedRegion,
   getCountryInfo,
 }) {
+  const { code } = useParams();
+
+  const {
+    country,
+    clickCountryInfo,
+    countryClicked,
+    clickingCountry,
+    countryInfo,
+    setCountryInfo,
+    darkMode,
+  } = useCountry();
+
+  const selectedCountry = countryInfo.find(
+    (countries) => countries.cca3 === code,
+  );
   return (
     <>
       {extractedRegion === region &&
         countries.map((country) => (
-          <Link className="country-link" to="/countryinfo">
+          <Link className="country-link" to={`${country.cca3}`}>
             <div
               onClick={() => getCountryInfo(country)}
-              className="country-container"
+              className={
+                darkMode ? "country-container dark" : "country-container"
+              }
               key={country.name.common}
             >
               <div className="img-flag-container">

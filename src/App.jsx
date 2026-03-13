@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Header from "./Header.jsx";
 import "./App.css";
 import FilteredCountries from "./filteredcountries.jsx";
 import magnifyingGlass from "../../frontend/src/assets/design/magnifying-glass.png";
+import darkModeMagnifying from "../../frontend/src/assets/design/search.png";
 import { useCountry } from "./CartContext.jsx";
 
 // Flag, Name, Population, Region, Capital
 
 function App() {
-  const [countryInfo, setCountryInfo] = useState([]);
+  const [borders, getCountriesBorders] = useState([]);
   const [searchItem, setSearchItem] = useState("");
   const [regions, setRegions] = useState([]);
   const [extractedRegion, setExtactedRegion] = useState("");
@@ -17,11 +18,26 @@ function App() {
   const [filteredCountries, setFilteredCountries] = useState([]);
   const [searching, currentlySearching] = useState(false);
   const [filter, currentlyFiltering] = useState(false);
-  const { country, clickCountryInfo, countryClicked, clickingCountry } =
-    useCountry();
+  const {
+    clickCountryInfo,
+    clickingCountry,
+    countryInfo,
+    setCountryInfo,
+    darkMode,
+    setDarkMode,
+  } = useCountry();
 
   useEffect(() => {
-    fetch("https://restcountries.com/v3.1/all?fields=region")
+    fetch("https://restcountries.com/v3.1/all?fields=borders")
+      .then((response) => response.json())
+      .then((data) => {
+        getCountriesBorders(data);
+      })
+      .catch((error) => console.log("Error loading data", error));
+  }, []);
+
+  useEffect(() => {
+    fetch("https://restcountries.com/v3.1/all?fields=region,")
       .then((response) => response.json())
       .then((data) => {
         setRegions(data);
@@ -33,7 +49,7 @@ function App() {
 
   useEffect(() => {
     fetch(
-      "https://restcountries.com/v3.1/all?fields=name,capital,region,flags,population,subregion,tld,currencies,languages,borders",
+      "https://restcountries.com/v3.1/all?fields=name,capital,region,flags,population,tld,currencies,languages,borders,cca3",
     )
       .then((response) => response.json())
       .then((data) => {
@@ -94,141 +110,188 @@ function App() {
 
   return (
     <>
-      <Header />
-      <div className="main-content-wrapper">
-        <div className="search-container">
-          <div className="search-box-container">
-            <div>
-              <img className="search-icon" src={magnifyingGlass} />
-            </div>
-            <div>
-              <label>
-                <input
-                  className="search-input"
-                  value={searchItem}
-                  onChange={handleInputChange}
-                  placeholder="Search for a country..."
-                  type="text"
+      <div id="root">
+        <Header />
+        <div
+          className={
+            darkMode ? "main-content-wrapper dark" : "main-content-wrapper"
+          }
+        >
+          <div className="search-container">
+            <div
+              className={
+                darkMode ? "search-box-container dark" : "search-box-container"
+              }
+            >
+              <div>
+                <img
+                  className="search-icon"
+                  src={darkMode ? darkModeMagnifying : magnifyingGlass}
                 />
-              </label>
+              </div>
+              <div>
+                <label>
+                  <input
+                    className={darkMode ? "search-input dark" : "search-input"}
+                    value={searchItem}
+                    onChange={handleInputChange}
+                    placeholder="Search for a country..."
+                    type="text"
+                  />
+                </label>
+              </div>
+              <p></p>
             </div>
-            <p></p>
+            <div
+              className={
+                darkMode
+                  ? "select-region-container dark"
+                  : "select-region-container"
+              }
+            >
+              <select
+                className={darkMode && "dark"}
+                onChange={handleRegion}
+                value={extractedRegion}
+              >
+                <option
+                  className={darkMode ? "select-option dark" : "select-option"}
+                  value=""
+                  disabled
+                >
+                  Select a region
+                </option>
+                {regionsWithoutDuplicates.map((region) => (
+                  <option>{region}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="select-region-container">
-            <select onChange={handleRegion} value={extractedRegion}>
-              <option className="select-option" value="" disabled>
-                Select a region
-              </option>
-              {regionsWithoutDuplicates.map((region) => (
-                <option>{region}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        {filter && (
-          <div className="filtered-countries-grid-container">
-            <FilteredCountries
-              getCountryInfo={getCountryInformation}
-              region={"Europe"}
-              extractedRegion={extractedRegion}
-              countries={europe}
-            />
-            <FilteredCountries
-              getCountryInfo={getCountryInformation}
-              region={"Africa"}
-              extractedRegion={extractedRegion}
-              countries={africa}
-            />
-            <FilteredCountries
-              getCountryInfo={getCountryInformation}
-              region={"Americas"}
-              extractedRegion={extractedRegion}
-              countries={america}
-            />
-            <FilteredCountries
-              getCountryInfo={getCountryInformation}
-              region={"Antarctic"}
-              extractedRegion={extractedRegion}
-              countries={antarctic}
-            />
-            <FilteredCountries
-              getCountryInfo={getCountryInformation}
-              region={"Asia"}
-              extractedRegion={extractedRegion}
-              countries={asia}
-            />
-            <FilteredCountries
-              getCountryInfo={getCountryInformation}
-              region={"Oceania"}
-              extractedRegion={extractedRegion}
-              countries={oceania}
-            />
-          </div>
-        )}
-        <div className="countries-grid-container">
-          {searching && !filter
-            ? filteredCountries.map((item) => (
-                <Link className="country-link" to="/countryinfo">
-                  <div
-                    onClick={() => getCountryInformation(item)}
-                    className="country-container"
-                    key={item.name.common}
-                  >
-                    <div className="img-flag-container">
-                      <img src={item.flags.png} />
-                    </div>
-                    <div className="country-info-container">
-                      <div className="country-name">{item.name.common}</div>
-                      <div>
-                        <div className="stats-container">
-                          <p>Population:</p>
-                          <p>{item.population}</p>
-                        </div>
-                        <div className="stats-container">
-                          <p>Region:</p>
-                          <p>{item.region}</p>
-                        </div>
-                        <div className="stats-container">
-                          <p>Capital:</p>
-                          <p>{item.capital} </p>
+          {filter && (
+            <div className="filtered-countries-grid-container">
+              <FilteredCountries
+                getCountryInfo={getCountryInformation}
+                region={"Europe"}
+                extractedRegion={extractedRegion}
+                countries={europe}
+              />
+              <FilteredCountries
+                getCountryInfo={getCountryInformation}
+                region={"Africa"}
+                extractedRegion={extractedRegion}
+                countries={africa}
+              />
+              <FilteredCountries
+                getCountryInfo={getCountryInformation}
+                region={"Americas"}
+                extractedRegion={extractedRegion}
+                countries={america}
+              />
+              <FilteredCountries
+                getCountryInfo={getCountryInformation}
+                region={"Antarctic"}
+                extractedRegion={extractedRegion}
+                countries={antarctic}
+              />
+              <FilteredCountries
+                getCountryInfo={getCountryInformation}
+                region={"Asia"}
+                extractedRegion={extractedRegion}
+                countries={asia}
+              />
+              <FilteredCountries
+                getCountryInfo={getCountryInformation}
+                region={"Oceania"}
+                extractedRegion={extractedRegion}
+                countries={oceania}
+              />
+            </div>
+          )}
+          <div className="countries-grid-container">
+            {searching && !filter
+              ? filteredCountries.map((item) => (
+                  <Link className="country-link" to={`${item.cca3}`}>
+                    <div
+                      onClick={() => getCountryInformation(item)}
+                      className={
+                        darkMode
+                          ? "country-container dark"
+                          : "country-container"
+                      }
+                      key={item.name.common}
+                    >
+                      <div className="img-flag-container">
+                        <img src={item.flags.png} />
+                      </div>
+                      <div
+                        className={
+                          darkMode
+                            ? "country-info-container dark"
+                            : "country-info-container"
+                        }
+                      >
+                        <div className="country-name">{item.name.common}</div>
+                        <div>
+                          <div className="stats-container">
+                            <p>Population:</p>
+                            <p>{item.population.toLocaleString()}</p>
+                          </div>
+                          <div className="stats-container">
+                            <p>Region:</p>
+                            <p>{item.region}</p>
+                          </div>
+                          <div className="stats-container">
+                            <p>Capital:</p>
+                            <p>{item.capital} </p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))
-            : !searching &&
-              !filter &&
-              countryInfo.map((item) => (
-                <Link className="country-link" to="/countryinfo">
-                  <div
-                    onClick={() => getCountryInformation(item)}
-                    className="country-container"
-                    key={item.name.common}
-                  >
-                    <div className="img-flag-container">
-                      <img src={item.flags.png} />
-                    </div>
-                    <div className="country-info-container">
-                      <div className="country-name">{item.name.common}</div>
-                      <div>
-                        <div className="stats-container">
-                          <p>Population:</p>
-                          <p>{item.population.toLocaleString()}</p>
-                        </div>
-                        <div className="stats-container">
-                          <p>Region:</p>
-                          <p>{item.region}</p>
-                        </div>
-                        <div className="stats-container">
-                          <p>Capital:</p>
-                          <p>{item.capital}</p>
+                  </Link>
+                ))
+              : !searching &&
+                !filter &&
+                countryInfo.map((item) => (
+                  <Link className="country-link" to={`${item.cca3}`}>
+                    <div
+                      onClick={() => getCountryInformation(item)}
+                      className={
+                        darkMode
+                          ? "country-container dark"
+                          : "country-container"
+                      }
+                      key={item.name.common}
+                    >
+                      <div className="img-flag-container">
+                        <img src={item.flags.png} />
+                      </div>
+                      <div
+                        className={
+                          darkMode
+                            ? "country-info-container dark"
+                            : "country-info-container"
+                        }
+                      >
+                        <div className="country-name">{item.name.common}</div>
+                        <div>
+                          <div className="stats-container">
+                            <p>Population:</p>
+                            <p>{item.population.toLocaleString()}</p>
+                          </div>
+                          <div className="stats-container">
+                            <p>Region:</p>
+                            <p>{item.region}</p>
+                          </div>
+                          <div className="stats-container">
+                            <p>Capital:</p>
+                            <p>{item.capital}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+          </div>
         </div>
       </div>
     </>
